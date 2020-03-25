@@ -172,6 +172,8 @@ cdef class Path:
 
     cdef int getFirstPoints(self, SkPoint **pp, int *count) except -1
 
+    cpdef Path transform(self, Matrix matrix)
+
 
 cpdef enum PathVerb:
     MOVE = kMove_Verb

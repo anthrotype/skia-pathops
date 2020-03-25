@@ -594,6 +594,11 @@ cdef class Path:
     def segments(self):
         return SegmentPenIterator(self)
 
+    cpdef Path transform(self, Matrix matrix):
+        cdef Path result = Path.__new__(Path)
+        self.path.transform(matrix.matrix, &result.path)
+        return result
+
 
 DEF NUM_VERBS = 7
 
