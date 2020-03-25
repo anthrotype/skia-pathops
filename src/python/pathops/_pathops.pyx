@@ -1649,12 +1649,16 @@ def test_get_positive_array_index(index, length):
     >>> test_get_positive_array_index(8, 9)
     8
     >>> test_get_positive_array_index(9, 9)
-    -1
+    Traceback (most recent call last):
+      ...
+    IndexError: Array index out of range: 9
     >>> test_get_positive_array_index(-1, 9)
     8
     >>> test_get_positive_array_index(-9, 9)
     0
     >>> test_get_positive_array_index(-10, 9)
-    -1
+    Traceback (most recent call last):
+      ...
+    IndexError: Array index out of range: -10
     """
     return _get_positive_array_index(index, length)
