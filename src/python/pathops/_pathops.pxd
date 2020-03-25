@@ -15,6 +15,7 @@ from ._skia.core cimport (
     kSmall_ArcSize,
     kLarge_ArcSize,
     SkPathDirection,
+    SkMatrix,
 )
 from ._skia.pathops cimport (
     SkOpBuilder,
@@ -311,3 +312,14 @@ cdef class OpBuilder:
     cpdef add(self, Path path, SkPathOp operator)
 
     cpdef Path resolve(self)
+
+
+cdef int _get_positive_array_index(int index, int length) except -1
+
+
+cdef class Matrix:
+
+    cdef SkMatrix matrix
+
+    @staticmethod
+    cdef Matrix create(const SkMatrix& matrix)

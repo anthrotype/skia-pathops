@@ -1374,6 +1374,252 @@ cdef class OpBuilder:
         return result
 
 
+cdef int _get_positive_array_index(int index, int length) except -1:
+    if index >= length or index < -length:
+        raise IndexError(f"Array index out of range: {index!r}")
+    if index < 0:
+        index += length
+    return index
+
+
+cdef class Matrix:
+
+    def __init__(
+        self,
+        scaleX=1,
+        skewX=0,
+        translateX=0,
+        skewY=0,
+        scaleY=1,
+        translateY=0,
+        persp0=0,
+        persp1=0,
+        persp2=1,
+    ):
+        self.matrix.setAll(
+            scaleX, skewX, translateX, skewY, scaleY, translateY, persp0, persp1, persp2
+        )
+
+    @staticmethod
+    cdef Matrix create(const SkMatrix& matrix):
+        cdef SkScalar buffer[9]
+        cdef Matrix self = Matrix.__new__(Matrix)
+        matrix.get9(buffer)
+        self.matrix.set9(buffer)
+        return self
+
+    @classmethod
+    def fromAffine(cls, a, b, c, d, e, f):
+        return cls(
+            scaleX=a,
+            skewY=b,
+            skewX=c,
+            scaleY=d,
+            translateX=e,
+            translateY=f,
+            persp0=0,
+            persp1=0,
+            persp2=1,
+        )
+
+    def __eq__(self, other):
+        if not isinstance(other, Matrix):
+            return NotImplemented
+        return self.matrix == (<Matrix>other).matrix
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}{tuple(self)}"
+
+    def __reduce__(self):
+        return (self.__class__, tuple(self))
+
+    def __len__(self):
+        return 9
+
+    def __getitem__(self, int index):
+        cdef int i = _get_positive_array_index(index, length=9)
+        return self.matrix.get(i)
+
+    def asAffine(self):
+        cdef SkScalar tmp[6]
+        self.matrix.asAffine(tmp)
+        return tuple(tmp[i] for i in range(6))
+
+    @property
+    def scaleX(self):
+        return self.matrix.getScaleX()
+
+    @scaleX.setter
+    def scaleX(self, SkScalar v):
+        self.matrix.setScaleX(v)
+
+    @property
+    def scaleY(self):
+        return self.matrix.getScaleY()
+
+    @scaleY.setter
+    def scaleY(self, SkScalar v):
+        self.matrix.setScaleY(v)
+
+    @property
+    def skewX(self):
+        return self.matrix.getSkewX()
+
+    @skewX.setter
+    def skewX(self, SkScalar v):
+        self.matrix.setSkewX(v)
+
+    @property
+    def skewY(self):
+        return self.matrix.getSkewY()
+
+    @skewY.setter
+    def skewY(self, SkScalar v):
+        self.matrix.setSkewY(v)
+
+    @property
+    def translateX(self):
+        return self.matrix.getTranslateX()
+
+    @translateX.setter
+    def translateX(self, SkScalar v):
+        self.matrix.setTranslateX(v)
+
+    @property
+    def translateY(self):
+        return self.matrix.getTranslateY()
+
+    @translateY.setter
+    def translateY(self, SkScalar v):
+        self.matrix.setTranslateY(v)
+
+    @property
+    def perspX(self):
+        return self.matrix.getPerspX()
+
+    @perspX.setter
+    def perspX(self, SkScalar v):
+        self.matrix.setPerspX(v)
+
+    @property
+    def perspY(self):
+        return self.matrix.getPerspY()
+
+    @perspY.setter
+    def perspY(self, SkScalar v):
+        self.matrix.setPerspY(v)
+
+    def __setitem__(self, int index, SkScalar v):
+        cdef int i = _get_positive_array_index(index, length=9)
+        self.matrix.set(i, v)
+
+    def setAffine(self, iterable):
+        cdef list values = list(iterable)
+        if len(values) != 6:
+            raise ValueError("Affine matrix requires 6 values")
+        cdef SkScalar buffer[6]
+        cdef int i
+        for i in range(6):
+            buffer[i] = values[i]
+        self.matrix.setAffine(buffer)
+        return self
+
+    def setIdentity(self):
+        self.matrix.setIdentity()
+        return self
+
+    def setTranslate(self, SkScalar dx, SkScalar dy):
+        self.matrix.setTranslate(dx, dy)
+        return self
+
+    def setScale(self, SkScalar sx, SkScalar sy, SkScalar px=0, SkScalar py=0):
+        self.matrix.setScale(sx, sy, px, py)
+        return self
+
+    def setRotate(self, SkScalar degrees, SkScalar px=0, SkScalar py=0):
+        self.matrix.setRotate(degrees, px, py)
+        return self
+
+    def setSkew(self, SkScalar kx, SkScalar ky, SkScalar px=0, SkScalar py=0):
+        self.matrix.setSkew(kx, ky, px, py)
+        return self
+
+    def setConcat(self, Matrix a, Matrix b):
+        self.matrix.setConcat(a.matrix, b.matrix)
+        return self
+
+    def preTranslate(self, SkScalar dx, SkScalar dy):
+        self.matrix.preTranslate(dx, dy)
+        return self
+
+    def preScale(self, SkScalar sx, SkScalar sy, SkScalar px=0, SkScalar py=0):
+        self.matrix.preScale(sx, sy, px, py)
+        return self
+
+    def preRotate(self, SkScalar degrees, SkScalar px=0, SkScalar py=0):
+        self.matrix.preRotate(degrees, px, py)
+        return self
+
+    def preSkew(self, SkScalar kx, SkScalar ky, SkScalar px=0, SkScalar py=0):
+        self.matrix.preSkew(kx, ky, px, py)
+
+    def preConcat(self, Matrix other):
+        self.matrix.preConcat(other.matrix)
+        return self
+
+    def postTranslate(self, SkScalar dx, SkScalar dy):
+        self.matrix.postTranslate(dx, dy)
+        return self
+
+    def postScale(self, SkScalar sx, SkScalar sy, SkScalar px=0, SkScalar py=0):
+        self.matrix.postScale(sx, sy, px, py)
+        return self
+
+    def postRotate(self, SkScalar degrees, SkScalar px=0, SkScalar py=0):
+        self.matrix.postRotate(degrees, px, py)
+        return self
+
+    def postSkew(self, SkScalar kx, SkScalar ky, SkScalar px=0, SkScalar py=0):
+        self.matrix.postSkew(kx, ky, px, py)
+
+    def postConcat(self, Matrix other):
+        self.matrix.postConcat(other.matrix)
+        return self
+
+    def mapPoints(self, points):
+        cdef int i, count = len(points)
+        cdef SkScalar x, y
+        cdef SkPoint *buffer = <SkPoint *>PyMem_Malloc(count * sizeof(SkPoint))
+        if not buffer:
+            raise MemoryError()
+        try:
+            for i, (x, y) in enumerate(points):
+                buffer[i] = SkPoint.Make(x, y)
+            self.matrix.mapPoints(buffer, count)
+            return [(buffer[i].x(), buffer[i].y()) for i in range(count)]
+        finally:
+            PyMem_Free(buffer)
+
+    def mapXY(self, SkScalar x, SkScalar y):
+        cdef SkPoint pt = self.matrix.mapXY(x, y)
+        return (pt.x(), pt.y())
+
+    def isFinite(self):
+        return self.matrix.isFinite()
+
+    def invert(self):
+        cdef SkMatrix tmp
+        cdef bint ok = self.matrix.invert(&tmp)
+        if not ok:
+            raise ValueError("{self!r} cannot be inverted")
+        return Matrix.create(tmp)
+
+    @staticmethod
+    def Concat(Matrix a, Matrix b):
+        cdef SkMatrix tmp = SkMatrix.Concat(a.matrix, b.matrix)
+        return Matrix.create(tmp)
+
+
 # Doctests
 
 
@@ -1389,3 +1635,21 @@ def test_collinear(p1, p2, p3):
     sp2 = SkPoint.Make(p2[0], p2[1])
     sp3 = SkPoint.Make(p3[0], p3[1])
     return collinear(sp1, sp2, sp3)
+
+
+def test_get_positive_array_index(index, length):
+    """
+    >>> test_get_positive_array_index(0, 9)
+    0
+    >>> test_get_positive_array_index(8, 9)
+    8
+    >>> test_get_positive_array_index(9, 9)
+    -1
+    >>> test_get_positive_array_index(-1, 9)
+    8
+    >>> test_get_positive_array_index(-9, 9)
+    0
+    >>> test_get_positive_array_index(-10, 9)
+    -1
+    """
+    return _get_positive_array_index(index, length)

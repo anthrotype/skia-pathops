@@ -17,6 +17,7 @@ from ._pathops import (
     bits2float,
     float2bits,
     decompose_quadratic_segment,
+    Matrix,
 )
 
 from .operations import (
