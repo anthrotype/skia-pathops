@@ -133,6 +133,8 @@ cdef extern from "include/core/SkPath.h":
 
             SkScalar conicWeight()
 
+        void transform(const SkMatrix& matrix, SkPath* dst) const
+
 
 cdef extern from * namespace "SkPath":
 
@@ -197,3 +199,72 @@ cdef extern from * namespace "SkStrokeRec":
     enum InitStyle:
         kHairline_InitStyle,
         kFill_InitStyle
+
+
+cdef extern from "include/core/SkMatrix.h":
+    cdef cppclass SkMatrix:
+        SkMatrix() except +
+
+        bint operator!= (const SkMatrix &a, const SkMatrix &b)
+        bint operator== (const SkMatrix &a, const SkMatrix &b)
+
+        SkScalar get(int index) const
+        SkScalar getScaleX() const
+        SkScalar getScaleY() const
+        SkScalar getSkewX() const
+        SkScalar getSkewY() const
+        SkScalar getTranslateX() const
+        SkScalar getTranslateY() const
+        SkScalar getPerspX() const
+        SkScalar getPerspY() const
+        void get9(SkScalar buffer[9]) const
+
+        SkMatrix& set(int index, SkScalar value)
+        SkMatrix& setScaleX(SkScalar v)
+        SkMatrix& setScaleY(SkScalar v)
+        SkMatrix& setSkewX(SkScalar v)
+        SkMatrix& setSkewY(SkScalar v)
+        SkMatrix& setTranslateX(SkScalar v)
+        SkMatrix& setTranslateY(SkScalar v)
+        SkMatrix& setPerspX(SkScalar v)
+        SkMatrix& setPerspY(SkScalar v)
+        SkMatrix& setAll(SkScalar scaleX,
+                         SkScalar skewX,
+                         SkScalar transX,
+                         SkScalar skewY,
+                         SkScalar scaleY,
+                         SkScalar transY,
+                         SkScalar persp0,
+                         SkScalar persp1,
+                         SkScalar persp2)
+        SkMatrix& set9(const SkScalar buffer[9])
+        SkMatrix& setIdentity()
+        SkMatrix& setTranslate(SkScalar dx, SkScalar dy)
+        SkMatrix& setScale(SkScalar sx, SkScalar sy, SkScalar px, SkScalar py)
+        SkMatrix& setRotate(SkScalar degrees, SkScalar px, SkScalar py)
+        SkMatrix& setSkew(SkScalar kx, SkScalar ky, SkScalar px, SkScalar py)
+        SkMatrix& setConcat(const SkMatrix &a, const SkMatrix &b)
+
+        SkMatrix& preTranslate(SkScalar dx, SkScalar dy)
+        SkMatrix& preScale(SkScalar sx, SkScalar sy, SkScalar px, SkScalar py)
+        SkMatrix& preRotate(SkScalar degrees, SkScalar px, SkScalar py)
+        SkMatrix& preSkew(SkScalar kx, SkScalar ky, SkScalar px, SkScalar py)
+        SkMatrix& preConcat(const SkMatrix &other)
+
+        SkMatrix& postTranslate(SkScalar dx, SkScalar dy)
+        SkMatrix& postScale(SkScalar sx, SkScalar sy, SkScalar px, SkScalar py)
+        SkMatrix& postRotate(SkScalar degrees, SkScalar px, SkScalar py)
+        SkMatrix& postSkew(SkScalar kx, SkScalar ky, SkScalar px, SkScalar py)
+        SkMatrix& postConcat(const SkMatrix &other)
+
+        bint asAffine(SkScalar affine[6]) const
+        SkMatrix& setAffine(const SkScalar affine[6])
+
+        void mapPoints(SkPoint pts[], int count) const
+        SkPoint mapXY(SkScalar x, SkScalar y) const
+
+        bint isFinite() const
+        bint invert(SkMatrix *inverse) const
+
+        @staticmethod
+        SkMatrix Concat(const SkMatrix& a, const SkMatrix& b)
