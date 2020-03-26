@@ -268,3 +268,16 @@ cdef extern from "include/core/SkMatrix.h":
 
         @staticmethod
         SkMatrix Concat(const SkMatrix& a, const SkMatrix& b)
+
+        @staticmethod
+        SkMatrix MakeAll(
+            SkScalar scaleX,
+            SkScalar skewX,
+            SkScalar transX,
+            SkScalar skewY,
+            SkScalar scaleY,
+            SkScalar transY,
+            SkScalar pers0,
+            SkScalar pers1,
+            SkScalar pers2,
+        )

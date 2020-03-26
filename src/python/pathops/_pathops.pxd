@@ -172,7 +172,18 @@ cdef class Path:
 
     cdef int getFirstPoints(self, SkPoint **pp, int *count) except -1
 
-    cpdef Path transform(self, Matrix matrix)
+    cpdef Path transform(
+        self,
+        SkScalar scaleX=*,
+        SkScalar skewY=*,
+        SkScalar skewX=*,
+        SkScalar scaleY=*,
+        SkScalar transX=*,
+        SkScalar transY=*,
+        SkScalar perspX=*,
+        SkScalar perspY=*,
+        SkScalar perspBias=*,
+    )
 
 
 cpdef enum PathVerb:

@@ -594,9 +594,53 @@ cdef class Path:
     def segments(self):
         return SegmentPenIterator(self)
 
-    cpdef Path transform(self, Matrix matrix):
+    cpdef Path transform(
+        self,
+        SkScalar scaleX=1,
+        SkScalar skewY=0,
+        SkScalar skewX=0,
+        SkScalar scaleY=1,
+        SkScalar transX=0,
+        SkScalar transY=0,
+        SkScalar perspX=0,
+        SkScalar perspY=0,
+        SkScalar perspBias=1,
+    ):
+        """Apply 3x3 transformation matrix and return new transformed Path.
+
+        SkMatrix stores the values in row-major order:
+
+        [ scaleX skewX transX
+          skewY scaleY transY
+          perspX perspY perspBias ]
+
+        However here the first 6 parameters are in column-major order, like
+        the affine matrix vectors from SVG transform attribute:
+
+        [ a c e
+          b d f    => [a b c d e f]
+          0 0 1 ]
+
+        This is so one can easily unpack a 6-tuple as positional arguments
+        to this method.
+
+        >>> p1 = Path()
+        >>> p1.moveTo(1, 2)
+        >>> p1.lineTo(3, 4)
+        >>> affine = (2, 0, 0, 2, 0, 0)
+        >>> p2 = p1.transform(*affine)
+        >>> list(p2.segments) == [
+            ('moveTo', ((2.0, 4.0),)),
+            ('lineTo', ((6.0, 8.0),)),
+            ('endPath', ()),
+        ]
+        True
+        """
+        cdef SkMatrix matrix = SkMatrix.MakeAll(
+            scaleX, skewX, transX, skewY, scaleY, transY, perspX, perspY, perspBias
+        )
         cdef Path result = Path.__new__(Path)
-        self.path.transform(matrix.matrix, &result.path)
+        self.path.transform(matrix, &result.path)
         return result
 
 
